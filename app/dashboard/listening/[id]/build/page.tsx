@@ -315,7 +315,7 @@ export default function ListeningBuilderPage() {
                 )}
 
                 {/* Uploaded file indicator */}
-                {uploadedFileName && part.audioUrl?.startsWith('/uploads/') && (
+                {uploadedFileName && (part.audioUrl?.startsWith('/uploads/') || part.audioUrl?.includes('cloudinary.com')) && (
                   <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200 rounded-lg">
                     <FileAudio size={16} className="text-teal-600 shrink-0" />
                     <div className="flex-1 min-w-0">
