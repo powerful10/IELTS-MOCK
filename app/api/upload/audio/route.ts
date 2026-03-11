@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error('Audio upload error:', msg);
     return NextResponse.json(
-      { success: false, message: msg },
+      { success: false, message: 'Failed to upload audio file. Please try again.' },
       { status: 500 }
     );
   }
