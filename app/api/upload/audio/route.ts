@@ -53,9 +53,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, url: blob.url, filename: file.name });
   } catch (error) {
-    console.error('Audio upload error:', error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Audio upload error:', msg);
     return NextResponse.json(
-      { success: false, message: 'Failed to upload audio file. Please try again.' },
+      { success: false, message: msg },
       { status: 500 }
     );
   }
