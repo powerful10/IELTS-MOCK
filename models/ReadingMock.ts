@@ -31,6 +31,7 @@ export interface IReadingMock extends Document {
   title: string;
   status: 'draft' | 'published';
   passages: IReadingPassage[];
+  pdfUrl: string;
   createdAt: Date;
 }
 
@@ -58,6 +59,7 @@ const ReadingMockSchema = new Schema({
   title: { type: String, required: true },
   status: { type: String, enum: ['draft', 'published'], default: 'draft' },
   passages: { type: [ReadingPassageSchema], default: [] },
+  pdfUrl: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
 });
 

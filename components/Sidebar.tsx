@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, Headphones, Home, Settings, Users } from 'lucide-react';
+import { BookOpen, Headphones, Home, Settings, Users, Sparkles } from 'lucide-react';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -10,6 +10,7 @@ const Sidebar = () => {
     { label: 'Dashboard', href: '/dashboard', icon: Home },
     { label: 'Reading', href: '/dashboard/reading', icon: BookOpen },
     { label: 'Listening', href: '/dashboard/listening', icon: Headphones },
+    { label: 'PDF AI Builder', href: '/dashboard/pdf-builder', icon: Sparkles },
     { label: 'Users', href: '/dashboard/users', icon: Users },
   ];
 

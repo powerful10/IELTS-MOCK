@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Save, Eye, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Save, Eye, ArrowLeft, CheckCircle, AlertCircle, FileJson, FileText, Upload, X } from 'lucide-react';
 import InlineQuestionEditor, { QuestionData } from '@/components/InlineQuestionEditor';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -11,6 +11,7 @@ interface Passage {
   _id?: string;
   passageNumber: 1 | 2 | 3;
   title: string;
+  pdfUrl?: string;
   content: string;
   questions: QuestionData[];
 }
@@ -19,6 +20,7 @@ interface ReadingMock {
   _id: string;
   title: string;
   status: string;
+  pdfUrl: string;
   passages: Passage[];
 }
 
@@ -42,6 +44,8 @@ export default function ReadingBuilderPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
   const [activePassage, setActivePassage] = useState<0 | 1 | 2>(0);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const fetchMock = useCallback(async () => {
     try {
@@ -99,7 +103,7 @@ export default function ReadingBuilderPage() {
       const res = await fetch(`/api/reading-mocks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passages: mock.passages, title: mock.title }),
+        body: JSON.stringify({ passages: mock.passages, title: mock.title, pdfUrl: mock.pdfUrl }),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok || !json?.success) throw new Error();
@@ -109,6 +113,25 @@ export default function ReadingBuilderPage() {
       setSaveStatus('error');
     } finally {
       setSaving(false);
+    }
+  };
+
+
+  const handlePdfUpload = async (file: File) => {
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload/pdf', { method: 'POST', body: formData });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || 'Upload failed');
+      if (mock) setMock({ ...mock, pdfUrl: json.url });
+    } catch (err: any) {
+      setError(err.message || 'PDF upload failed.');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -203,17 +226,20 @@ export default function ReadingBuilderPage() {
           <div className="flex flex-col lg:flex-row h-full">
             {/* Passage Text Editor */}
             <div className="lg:w-1/2 p-6 border-r border-slate-200 flex flex-col gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Passage {activePassage + 1} Title
-                </label>
-                <input
-                  type="text"
-                  value={passage.title}
-                  onChange={(e) => updatePassage(activePassage, { title: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                  placeholder="e.g., The History of Urban Agriculture"
-                />
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Passage {activePassage + 1} Title
+                  </label>
+                  <input
+                    type="text"
+                    value={passage.title}
+                    onChange={(e) => updatePassage(activePassage, { title: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                    placeholder="e.g., The History of Urban Agriculture"
+                  />
+                </div>
+
               </div>
               <div className="flex-1 flex flex-col">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">

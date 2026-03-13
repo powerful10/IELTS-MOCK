@@ -23,8 +23,9 @@ export async function POST(request: NextRequest) {
 
     const mock = await ReadingMock.create({
       title: title.trim(),
-      status: 'draft',
-      passages: [
+      status: body.status || 'draft',
+      pdfUrl: body.pdfUrl || '',
+      passages: body.passages || [
         { passageNumber: 1, title: '', content: '', questions: [] },
         { passageNumber: 2, title: '', content: '', questions: [] },
         { passageNumber: 3, title: '', content: '', questions: [] },

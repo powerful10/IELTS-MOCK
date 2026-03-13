@@ -31,6 +31,7 @@ export interface IListeningMock extends Document {
   title: string;
   status: 'draft' | 'published';
   parts: IListeningPart[];
+  pdfUrl: string;
   createdAt: Date;
 }
 
@@ -58,6 +59,7 @@ const ListeningMockSchema = new Schema({
   title: { type: String, required: true },
   status: { type: String, enum: ['draft', 'published'], default: 'draft' },
   parts: { type: [ListeningPartSchema], default: [] },
+  pdfUrl: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
 });
 

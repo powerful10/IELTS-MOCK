@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, XCircle, Wrench } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Wrench, FileText } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 function getBandScore(correct: number, total: number): string {
@@ -164,28 +164,60 @@ export default function ListeningPreviewPage() {
 
         {/* Main Content */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Audio + Context */}
-          <div className="flex-1 p-8 bg-white border-r border-slate-200 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">Part {activePart + 1}</h2>
-            {part.audioUrl?.trim() ? (
-              <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">🎧 Listen to the recording</p>
-                <audio controls className="w-full">
-                  <source src={part.audioUrl} />
-                  Your browser does not support audio playback.
-                </audio>
+          {/* Part Content (PDF or Default) */}
+          <div className="flex-1 overflow-hidden bg-white border-r border-slate-200 flex flex-col">
+            {mock.pdfUrl ? (
+              <div className="flex-1 w-full h-full bg-slate-100 flex flex-col">
+                <div className="flex items-center justify-between px-4 py-2 bg-teal-50 border-b border-teal-100">
+                  <span className="text-xs font-bold text-teal-700 uppercase tracking-wider flex items-center gap-2">
+                    <FileText size={14} /> PDF SOURCE PREVIEW
+                  </span>
+                  <div className="flex items-center gap-3">
+                    {part.audioUrl?.trim() && (
+                      <audio controls className="h-8 max-w-[200px]">
+                        <source src={part.audioUrl} />
+                      </audio>
+                    )}
+                    <a 
+                      href={mock.pdfUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[10px] bg-white px-2 py-1 rounded border border-teal-200 text-teal-600 font-bold hover:bg-teal-500 hover:text-white transition-all"
+                    >
+                      OPEN FULL PDF
+                    </a>
+                  </div>
+                </div>
+                <iframe 
+                  src={mock.pdfUrl} 
+                  className="flex-1 w-full border-none"
+                  title={`Part ${activePart + 1} PDF`}
+                />
               </div>
             ) : (
-              <div className="mb-6 p-6 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm">
-                No audio has been added for this part yet.
+              <div className="flex-1 p-8 bg-white overflow-y-auto">
+                <h2 className="text-2xl font-bold text-slate-800 mb-4">Part {activePart + 1}</h2>
+                {part.audioUrl?.trim() ? (
+                  <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">🎧 Listen to the recording</p>
+                    <audio controls className="w-full">
+                      <source src={part.audioUrl} />
+                      Your browser does not support audio playback.
+                    </audio>
+                  </div>
+                ) : (
+                  <div className="mb-6 p-6 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm">
+                    No audio has been added for this part yet.
+                  </div>
+                )}
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    Listen to the audio recording and answer the questions in the panel on the right.
+                    You may replay the audio as needed in this practice mode.
+                  </p>
+                </div>
               </div>
             )}
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <p className="text-sm text-slate-500 leading-relaxed">
-                Listen to the audio recording and answer the questions in the panel on the right.
-                You may replay the audio as needed in this practice mode.
-              </p>
-            </div>
           </div>
 
           {/* Questions */}

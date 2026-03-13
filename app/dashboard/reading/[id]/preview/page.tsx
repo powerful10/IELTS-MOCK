@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, XCircle, Wrench } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Wrench, FileText } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Standard IELTS Reading band score table
@@ -178,18 +178,43 @@ export default function ReadingPreviewPage() {
 
         {/* Main Preview Content */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Passage Text */}
-          <div className="flex-1 overflow-y-auto p-8 bg-white border-r border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-800 mb-1">Passage {activePassage + 1}</h2>
-            {passage.title && <h3 className="text-lg font-semibold text-slate-600 mb-6">{passage.title}</h3>}
-            {passage.content ? (
-              <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-[15px] font-serif space-y-4">
-                {passage.content.split('\n').filter((l: string) => l.trim()).map((para: string, i: number) => (
-                  <p key={i}>{para}</p>
-                ))}
+          {/* Passage Content (PDF or Text) */}
+          <div className="flex-1 overflow-hidden bg-white border-r border-slate-200 flex flex-col">
+            {mock.pdfUrl ? (
+              <div className="flex-1 w-full h-full bg-slate-100 flex flex-col">
+                <div className="flex items-center justify-between px-4 py-2 bg-indigo-50 border-b border-indigo-100">
+                  <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-2">
+                    <FileText size={14} /> PDF SOURCE PREVIEW
+                  </span>
+                  <a 
+                    href={mock.pdfUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[10px] bg-white px-2 py-1 rounded border border-indigo-200 text-indigo-600 font-bold hover:bg-indigo-500 hover:text-white transition-all"
+                  >
+                    OPEN FULL PDF
+                  </a>
+                </div>
+                <iframe 
+                  src={mock.pdfUrl} 
+                  className="flex-1 w-full border-none"
+                  title={`Passage ${activePassage + 1} PDF`}
+                />
               </div>
             ) : (
-              <div className="py-16 text-center text-slate-400">No passage text added yet.</div>
+              <div className="flex-1 overflow-y-auto p-8">
+                <h2 className="text-2xl font-bold text-slate-800 mb-1">Passage {activePassage + 1}</h2>
+                {passage.title && <h3 className="text-lg font-semibold text-slate-600 mb-6">{passage.title}</h3>}
+                {passage.content ? (
+                  <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-[15px] font-serif space-y-4">
+                    {passage.content.split('\n').filter((l: string) => l.trim()).map((para: string, i: number) => (
+                      <p key={i}>{para}</p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-16 text-center text-slate-400">No passage text added yet.</div>
+                )}
+              </div>
             )}
           </div>
 

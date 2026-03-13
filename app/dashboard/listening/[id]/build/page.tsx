@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Save, Eye, ArrowLeft, CheckCircle, AlertCircle, Music, Upload, Link2, X, FileAudio } from 'lucide-react';
+import { Plus, Save, Eye, ArrowLeft, CheckCircle, AlertCircle, Music, Upload, Link2, X, FileAudio, FileJson, FileText } from 'lucide-react';
 import InlineQuestionEditor, { QuestionData } from '@/components/InlineQuestionEditor';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -11,6 +11,7 @@ interface Part {
   _id?: string;
   partNumber: 1 | 2 | 3 | 4;
   audioUrl: string;
+  pdfUrl?: string;
   transcript: string;
   questions: QuestionData[];
 }
@@ -19,6 +20,7 @@ interface ListeningMock {
   _id: string;
   title: string;
   status: string;
+  pdfUrl: string;
   parts: Part[];
 }
 
@@ -46,7 +48,9 @@ export default function ListeningBuilderPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingPdf, setIsDraggingPdf] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
 
   const fetchMock = useCallback(async () => {
@@ -116,6 +120,25 @@ export default function ListeningBuilderPage() {
     }
   };
 
+  const handlePdfUpload = async (file: File) => {
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload/pdf', { method: 'POST', body: formData });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || 'Upload failed');
+      if (mock) setMock({ ...mock, pdfUrl: json.url });
+    } catch (err: any) {
+      setUploadError(err.message || 'PDF upload failed.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
@@ -131,7 +154,7 @@ export default function ListeningBuilderPage() {
       const res = await fetch(`/api/listening-mocks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ parts: mock.parts, title: mock.title }),
+        body: JSON.stringify({ parts: mock.parts, title: mock.title, pdfUrl: mock.pdfUrl }),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok || !json?.success) throw new Error();
@@ -164,21 +187,12 @@ export default function ListeningBuilderPage() {
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
-              <CheckCircle size={16} /> Saved
-            </span>
-          )}
-          {saveStatus === 'error' && (
-            <span className="flex items-center gap-1.5 text-sm text-red-600 font-medium">
-              <AlertCircle size={16} /> Save failed
-            </span>
-          )}
           <Link
-            href={`/dashboard/listening/${id}/preview`}
+            href={`/test/listening/${id}`}
+            target="_blank"
             className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
           >
-            <Eye size={16} /> Preview
+            <Eye size={16} /> Preview CBT
           </Link>
           <button
             onClick={handleSave}
@@ -315,7 +329,7 @@ export default function ListeningBuilderPage() {
                 )}
 
                 {/* Uploaded file indicator */}
-                {uploadedFileName && (part.audioUrl?.startsWith('/uploads/') || part.audioUrl?.includes('cloudinary.com')) && (
+                {uploadedFileName && (part.audioUrl?.startsWith('/uploads/') || part.audioUrl?.includes('cloudinary.com') || part.audioUrl?.includes('vercel-storage.com')) && (
                   <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200 rounded-lg">
                     <FileAudio size={16} className="text-teal-600 shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -351,6 +365,7 @@ export default function ListeningBuilderPage() {
                 </div>
               </div>
             )}
+
 
             {/* Audio Player Preview */}
             {part.audioUrl?.trim() && (

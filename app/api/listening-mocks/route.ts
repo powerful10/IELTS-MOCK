@@ -23,8 +23,9 @@ export async function POST(request: NextRequest) {
 
     const mock = await ListeningMock.create({
       title: title.trim(),
-      status: 'draft',
-      parts: [
+      status: body.status || 'draft',
+      pdfUrl: body.pdfUrl || '',
+      parts: body.parts || [
         { partNumber: 1, audioUrl: '', transcript: '', questions: [] },
         { partNumber: 2, audioUrl: '', transcript: '', questions: [] },
         { partNumber: 3, audioUrl: '', transcript: '', questions: [] },

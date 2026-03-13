@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let cached = (global as any).mongoose;
 
@@ -20,6 +19,7 @@ async function connectToDatabase() {
     if (process.env.NODE_ENV === 'development') {
       // Development mode: Use in-memory MongoDB
       if (!cached.mongod) {
+        const { MongoMemoryServer } = await import('mongodb-memory-server');
         cached.mongod = await MongoMemoryServer.create();
       }
       
